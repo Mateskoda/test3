@@ -112,6 +112,8 @@ public class LabyrinthImpl implements Labyrinth {
 
     @Override
     public void setCellType(Coordinate c, CellType type) throws CellException {
+        try {
+
         if (c.getRow() > getHeight()) {
             throw new CellException(c.getRow(), c.getCol(), "the labyrinth has not so many rows,please try another coordinate");
         } else if (c.getRow() < 0) {
@@ -121,40 +123,58 @@ public class LabyrinthImpl implements Labyrinth {
         } else if (c.getCol() < 0) {
             throw new CellException(c.getRow(), c.getCol(), "the first number of coordinate(columns) must be positive,please try another coordinate");
         }
-        try {
-            labyrinthHashMap.get(c.getRow()).set(c.getCol(), type);
-            if (type.equals(CellType.START)) {
-                setStartCoordinate(c);
-                setPlayerPosition(c);
+        else {
+            try {
+                labyrinthHashMap.putIfAbsent(c.getRow(), new ArrayList<>());
+                labyrinthHashMap.get(c.getRow()).add(c.getCol(), type);
+//        try {
+//            labyrinthHashMap.get(c.getRow()).set(c.getCol(), type);
+            } catch (NullPointerException n) {
+//            System.out.println("NullPointerException");
             }
-            if (type.equals(CellType.END)) {
-setEndCoordinate(c);
-            }
+        }
+        } catch (CellException cellException) {
+//            System.out.println("NullPointerException");
+        }
+
+
+            try {
+            labyrinthHashMap.putIfAbsent(c.getRow(), new ArrayList<>());
+            labyrinthHashMap.get(c.getRow()).add(c.getCol(), type);
+//        try {
+//            labyrinthHashMap.get(c.getRow()).set(c.getCol(), type);
         } catch (NullPointerException n) {
 //            System.out.println("NullPointerException");
         }
         if (type.equals(CellType.START)) {
-            for (int hh = 0; hh < getHeight(); hh++) {
-                for (int ww = 0; ww < getWidth(); ww++) {
-                    try {
-                        if (labyrinthHashMap.get(hh).get(ww).equals(CellType.START)) {
-                            labyrinthHashMap.get(hh).set(ww, CellType.WALL);
-                        }
-                        setCellType(new Coordinate(ww, hh), CellType.WALL);
-                        if (playerCoordinate.equals(new Coordinate(ww, hh))) {
-                            playerCoordinate = c;
-                        }
-                    } catch (NullPointerException n) {
+            setStartCoordinate(c);
+            setPlayerPosition(c);
+        }
+        if (type.equals(CellType.END)) {
+            setEndCoordinate(c);
+        }
+//        if (type.equals(CellType.START)) {
+//            for (int hh = 0; hh < getHeight(); hh++) {
+//                for (int ww = 0; ww < getWidth(); ww++) {
+//                    try {
+//                        if (labyrinthHashMap.get(hh).get(ww).equals(CellType.START)&& !(new Coordinate(ww,hh).equals(c))) {
+//                            labyrinthHashMap.get(hh).set(ww, CellType.WALL);
+//                        }
+//                        setCellType(new Coordinate(ww, hh), CellType.WALL);
+//                        if (playerCoordinate.equals(new Coordinate(ww, hh))) {
+//                            playerCoordinate = c;
+//                        }
+//                    } catch (NullPointerException n) {
 //                        System.out.println("NullPointerException");
-                    }
 
+//    }
 //
 
-                }
+//                }
             }
 
-        }
-    }
+//        }
+//    }
 
     @Override
     public Coordinate getPlayerPosition() {
@@ -235,7 +255,7 @@ setEndCoordinate(c);
                 }
             }
 
-            if (getPlayerPosition().getRow() < getHeight()) {
+            if (getPlayerPosition().getRow() < getHeight()-1) {
                 if (labyrinthHashMap.get(getPlayerPosition().getRow() + 1).get(getPlayerPosition().getCol()).equals(CellType.EMPTY)) {
                     dirs.add(Direction.SOUTH);
                 }
@@ -247,7 +267,7 @@ setEndCoordinate(c);
                 }
             }
 
-            if (getPlayerPosition().getCol() < getWidth()) {
+            if (getPlayerPosition().getCol() < getWidth()-1) {
                 if (labyrinthHashMap.get(getPlayerPosition().getRow()).get(getPlayerPosition().getCol() + 1).equals(CellType.EMPTY)) {
                     dirs.add(Direction.EAST);
                 }
